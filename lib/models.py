@@ -10,6 +10,14 @@ metadata = MetaData(naming_convention=convention)
 
 Base = declarative_base(metadata=metadata)
 
+games_users = Table('games_users',
+                    Base.metadata,
+                    Column('game_id', ForeignKey('games.id'),
+                           primary_key=True),
+                    Column('user_id', ForeignKey('users.id'),
+                           primary_key=True),
+                    extend_existing=True)
+
 
 class Game(Base):
     __tablename__ = 'games'
@@ -21,6 +29,7 @@ class Game(Base):
     price = Column(Integer())
 
     reviews = relationship('Review', backref=backref('game'))
+    users = relationship('User', secondary=games_users, back_populates='games')
 
     def __repr__(self):
         return f'Game(id={self.id}, ' + \
@@ -53,6 +62,7 @@ class User(Base):
     updated_at = Column(DateTime(), onupdate=func.now())
 
     reviews = relationship('Review', backref='user')
+    games = relationship('Game', secondary=games_users, back_populates='users')
 
     def __repr__(self):
         return f"User(id={self.id}, " + \
